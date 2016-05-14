@@ -1,0 +1,29 @@
+*.rbc
+capybara-*.html
+.rspec
+/log
+/tmp
+/config/*.yml
+/public/system
+public/uploads/gallery/image/*
+public/uploads/tmp/*
+/coverage/
+/spec/tmp
+**.orig
+rerun.txt
+pickle-email-*.html
+
+# TODO Comment out these rules if you are OK with secrets being uploaded to the repo
+config/initializers/secret_token.rb
+config/secrets.yml
+
+## Environment normalization:
+/.bundle
+/vendor/bundle
+
+.rvmrc
+.project
+.byebug_history
+.buildpath
+
+
