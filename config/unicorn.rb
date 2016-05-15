@@ -1,11 +1,8 @@
 APP_ROOT = File.expand_path(File.dirname(File.dirname(__FILE__)))
-`echo "APP_ROOT: #{APP_ROOT}" >> /tmp/unicorn.log`
 if ENV['MY_RUBY_HOME'] && ENV['MY_RUBY_HOME'].include?('rvm')
   begin
     rvm_path = File.dirname(File.dirname(ENV['MY_RUBY_HOME']))
-`echo "rvm_path: #{rvm_path}" >> /tmp/unicorn.log`
     rvm_lib_path = File.join(rvm_path, 'lib')
-`echo "rvm_lib_path: #{rvm_lib_path}" >> /tmp/unicorn.log`
     #$LOAD_PATH.unshift rvm_lib_path
     require 'rvm'
     RVM.use_from_path! APP_ROOT
@@ -14,9 +11,7 @@ if ENV['MY_RUBY_HOME'] && ENV['MY_RUBY_HOME'].include?('rvm')
   end
 end
 
-`echo "ENV['GEM_PATH']: #{ENV['GEM_PATH']}" >> /tmp/unicorn.log`
 ENV['GEM_PATH'] = "/usr/local/rvm/gems/ruby-2.3.1@maze.dev.asm68k.org"
-`echo "ENV['GEM_PATH']: #{ENV['GEM_PATH']}" >> /tmp/unicorn.log`
 ENV['BUNDLE_GEMFILE'] = File.expand_path('../Gemfile', File.dirname(__FILE__))
 require 'bundler/setup'
 
