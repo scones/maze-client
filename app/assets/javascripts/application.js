@@ -5,7 +5,7 @@
 
 $(document).ready(function() {
 
-  var core = core || {};
+  core = core || {};
 
   core.WIDTH       = null;
   core.HEIGHT      = null;
