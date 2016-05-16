@@ -15,19 +15,8 @@ $(document).ready(function() {
   core.FAR         = 1000.0;
 
 
-  core.node = function(seed, size, parent = null) {
-    this.parent = parent;
-    this.size = size;
-    this.children = new Array(4);
-    this.geometry = new THREE.BufferGeometry();
-  };
-
-
-  core.cell = function(parent) {
-    this.parent = parent;
-    this.directions = new Array(4);
-  };
-
+  var maze = new core.maze(1, 16);
+  maze.init();
 
   core.init_geometry = function() {
     // basic stuff
@@ -39,27 +28,45 @@ $(document).ready(function() {
     // camera
     core.camera = new THREE.PerspectiveCamera(core.VIEW_ANGLE, 0, core.NEAR, core.FAR);
     onWindowResize();
-    core.camera.position.z = 300;
+    core.camera.position.z = 20;
     core.scene.add(core.camera);
 
     // geometry
-    var sphereMaterial = new THREE.MeshLambertMaterial({
-      color: 0xCC0000
+    var sphereMaterial = new THREE.MeshBasicMaterial({
+      color: 0xFFFFFF
     });
-    var radius = 50, segments = 16, rings = 16;
-    var geometry = new THREE.IcosahedronGeometry(radius);
-    core.mesh = new THREE.Mesh(
+    var geometry = new THREE.Geometry();
+    var line_count = 0;
+    var size_2 = maze.size >>> 1;
+    for(i = 0; i < maze.size; ++i) {
+      for (j = 0; j < maze.size; ++j) {
+        var current_node = maze.nodes[maze.size * j + i];
+        if (current_node.paths[core.DIRECTION.RIGHT] == core.PATH_TYPE.OPEN) {
+          ++line_count;
+          geometry.vertices.push(new THREE.Vector3((i + 1) - size_2, (j + 1) - size_2, 0.0));
+          geometry.vertices.push(new THREE.Vector3((i + 2) - size_2, (j + 1) - size_2, 0.0));
+        }
+        if (current_node.paths[core.DIRECTION.DOWN] == core.PATH_TYPE.OPEN) {
+          ++line_count;
+          geometry.vertices.push(new THREE.Vector3((i + 1) - size_2, (j + 1) - size_2, 0.0));
+          geometry.vertices.push(new THREE.Vector3((i + 1) - size_2, (j + 2) - size_2, 0.0));
+        }
+      }
+    }
+    core.mesh = new THREE.LineSegments(
       geometry,
       sphereMaterial
     );
     core.scene.add(core.mesh);
 
     // light
+/*
     var pointLight = new THREE.PointLight( 0xFFFFFF );
     pointLight.position.x = 70;
     pointLight.position.y = 40;
     pointLight.position.z = 90;
     core.scene.add(pointLight);
+*/
   };
 
 
@@ -81,8 +88,8 @@ $(document).ready(function() {
   function render() {
     requestAnimationFrame(render);
 
-    core.mesh.rotation.x += 0.0053;
-    core.mesh.rotation.y += 0.0111;
+//    core.mesh.rotation.x += 0.0053;
+//    core.mesh.rotation.y += 0.0111;
 
     core.renderer.render(core.scene, core.camera);
   }
