@@ -6,7 +6,9 @@
     = render partial: 'layouts/clear'
     :javascript
       core = {
-        debug: #{Rails.env.production? ? 0 : 1000}
+        debug: {
+          level: #{Rails.env.production? ? 0 : 1000}
+        }
       }
     = stylesheet_link_tag    'application', media: 'all'
     = javascript_include_tag 'application', debug: false
