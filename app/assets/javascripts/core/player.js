@@ -9,6 +9,12 @@ core.player = function(view_angle, near, far) {
   this.delta_pitch = 0.0;
   this.delta_yaw = 0.0;
   this.delta_roll = 0.0;
+  this.yaw_angle  = 0.0;
+  this.pitch_angle = 0.0;
+  this.roll_angle = 0.0;
+  this.orig_facing_axis = null;
+  this.orig_up_axis = null;
+  this.orig_right_side_axis = null;
   this.facing = null;
   this.right_side = null;
   this.mass = 10.0;
@@ -21,9 +27,13 @@ core.player = function(view_angle, near, far) {
 core.player.prototype.init = function(position, up) {
   this.camera = new THREE.PerspectiveCamera(this.view_angle, 0, this.near, this.far);
   this.camera.position.set(position.x, position.y, position.z);
-  this.camera.up.set(up.x, up.y, up.z);
-  this.camera.lookAt(new THREE.Vector3(0,0,0));
-  this.facing = new THREE.Vector3(-position.x, -position.y, -position.z);
+  this.camera.up.copy(up);
+  this.facing = new THREE.Vector3(0, 0, -1);
+  this.roll_axis = this.facing.clone();
+  this.yaw_axis = this.camera.up.clone();
+  this.pitch_axis = new THREE.Vector3();
+  this.pitch_axis.crossVectors(this.facing, this.camera.up);
+  this.pitch_axis.normalize();
 
   // trigger resize
   var evt = document.createEvent('UIEvents');
@@ -121,29 +131,44 @@ core.player.prototype.update_position = function(delta_time) {
 
 
 core.player.prototype.update_camera = function() {
-  // setup axis
   if (this.delta_yaw || this.delta_pitch || this.delta_roll) {
-    var yaw_axis = this.camera.up.clone();
-    var roll_axis = this.facing.clone();
-    this.right_side.crossVectors(this.facing, this.camera.up);
-    this.right_side.normalize();
+    // update angles
+    this.yaw_angle += this.delta_yaw;
+    this.pitch_angle += this.delta_pitch;
+    this.roll_angle += this.delta_roll;
 
+    // keep angles in good interval
+/*
+    if (this.pitch_angle > core.math.PI_2)
+      this.pitch_angle -= core.math.PI_2;
+    if (this.yaw_angle > core.math.PI_2)
+      this.yaw_angle -= core.math.PI_2;
+    if (this.roll_angle > core.math.PI_2)
+      this.roll_angle -= core.math.PI_2;
+
+    if (this.pitch_angle < 0)
+      this.pitch_angle += core.math.PI_2;
+    if (this.yaw_angle < 0)
+      this.yaw_angle += core.math.PI_2;
+    if (this.roll_angle < 0)
+      this.roll_angle += core.math.PI_2;
+*/
     // setup quaternions
     var yaw = new THREE.Quaternion();
     var pitch = new THREE.Quaternion();
     var roll = new THREE.Quaternion();
-    yaw.setFromAxisAngle(yaw_axis, this.delta_yaw);
-    pitch.setFromAxisAngle(this.right_side, this.delta_pitch);
-    roll.setFromAxisAngle(roll_axis, this.delta_roll);
+    yaw.setFromAxisAngle(this.yaw_axis, this.yaw_angle);
+    pitch.setFromAxisAngle(this.pitch_axis, this.pitch_angle);
+    roll.setFromAxisAngle(this.roll_axis, this.roll_angle);
 
     var tmp = new THREE.Quaternion();
     var rotation = new THREE.Quaternion();
     tmp.multiplyQuaternions(pitch, roll);
     rotation.multiplyQuaternions(yaw, tmp); // rotation = yaw * pitch * roll
-//    rotation.multiplyQuaternions(yaw, pitch);
 
-    var up = this.camera.up.clone();
-    var facing = this.facing.clone();
+    // apply rotations
+    var up = this.yaw_axis.clone();
+    var facing = this.roll_axis.clone();
     up.applyQuaternion(rotation);
     facing.applyQuaternion(rotation);
     up.normalize();
@@ -157,20 +182,17 @@ core.player.prototype.update_camera = function() {
     this.camera.lookAt(look_at);
     this.camera.updateProjectionMatrix();
 
+    // fading rotation effect
     if (this.delta_yaw)
-      this.delta_yaw *= 0.91;
+      this.delta_yaw *= 0.92;
 
     if (this.delta_pitch)
-      this.delta_pitch *= 0.91;
+      this.delta_pitch *= 0.92;
 
     if (this.delta_roll)
       this.delta_roll *= 0.975;
 
-    /*
-    this.delta_yaw = 0;
-    this.delta_pitch = 0;
-    this.delta_roll = 0;
-    */
+    this.rotation_update = false;
   }
 };
 
