@@ -158,11 +158,11 @@ $(document).ready(function() {
   function mouse_move_callback(delta_x, delta_y) {
     if (core.events.is_pointer_lock_enabled) {
       if (delta_x) {
-        var f_delta_x = delta_x / -100.0;
+        var f_delta_x = delta_x / -1000.0;
         player.add_yaw(f_delta_x);
       }
       if (delta_y) {
-        var f_delta_y = delta_y / -100.0;
+        var f_delta_y = delta_y / -1000.0;
         player.add_pitch(f_delta_y);
       }
     }
